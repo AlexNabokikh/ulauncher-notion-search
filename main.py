@@ -1,13 +1,15 @@
-from ulauncher.api.client.EventListener import EventListener
-from ulauncher.api.client.Extension import Extension
-from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
-from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
-from ulauncher.api.shared.action.RenderResultListAction import RenderResultListAction
-from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
-from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
+from os import system
 
 from notion_search import Notion
-from os import system
+from ulauncher.api.client.EventListener import EventListener
+from ulauncher.api.client.Extension import Extension
+from ulauncher.api.shared.action.DoNothingAction import DoNothingAction
+from ulauncher.api.shared.action.ExtensionCustomAction import \
+    ExtensionCustomAction
+from ulauncher.api.shared.action.RenderResultListAction import \
+    RenderResultListAction
+from ulauncher.api.shared.event import ItemEnterEvent, KeywordQueryEvent
+from ulauncher.api.shared.item.ExtensionResultItem import ExtensionResultItem
 
 
 class NotionSearch(Extension):
@@ -20,7 +22,7 @@ class NotionSearch(Extension):
 
 
 class KeywordQueryEventListener(EventListener):
-    TOKEN = '~'
+    TOKEN = "~"
 
     def on_event(self, event, extension):
         extension = self._run_extension(extension)
@@ -42,33 +44,33 @@ class KeywordQueryEventListener(EventListener):
         text = event.get_argument()
         pages = extension.NOTION.search(text)
         for page in pages:
-            item = ExtensionResultItem(icon="images/icon.png",
-                                       name=page['title'],
-                                       description=page['description'],
-                                       on_enter=ExtensionCustomAction(page))
+            item = ExtensionResultItem(
+                icon="images/icon.png",
+                name=page["title"],
+                description=page["description"],
+                on_enter=ExtensionCustomAction(page),
+            )
             items.append(item)
         return items
 
     def _show_error_info(self, e):
         name = str(type(e)).split("'")[1]
         description = str(e)
-        item = ExtensionResultItem(icon="images/icon.png",
-                                   name=name,
-                                   description=description,
-                                   on_enter=DoNothingAction())
+        item = ExtensionResultItem(
+            icon="images/icon.png", name=name, description=description, on_enter=DoNothingAction()
+        )
         return [item]
 
 
 class ItemEnterEventListener(EventListener):
-
     def on_event(self, event, extension):
-        url = event.get_data()['url']
+        url = event.get_data()["url"]
         open_in = extension.preferences.get("open_in").lower()
-        if open_in == 'app':
-            url = url.replace('https', 'notion')
-            url = url.replace('http', 'notion')
+        if open_in == "app":
+            url = url.replace("https", "notion")
+            url = url.replace("http", "notion")
         system(f"xdg-open {url} &")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     NotionSearch().run()
